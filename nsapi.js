@@ -145,8 +145,9 @@ app.storingen = function( params, callback ) {
 				callback( new Error('unexpected response') )
 			} else {
 				data = data.Storingen
-				data.Ongepland = data.Ongepland.Storing || []
-				data.Gepland = data.Gepland.Storing || []
+				data.Ongepland = data.Ongepland || [];
+
+				data.Gepland = data.Gepland || []
 
 				if( !util.isArray( data.Ongepland ) ) {
 					data.Ongepland = [data.Ongepland]
@@ -200,8 +201,7 @@ app.talk = function( path, props, callback ) {
 				})
 			} else if( data.match('<?xml') ) {
 				parseString(data, {trim: true, emptyTag:{}, normalize: true}, function (err, result) {
-					callback( null, result )
-
+					callback( null, result );
 				});
 
 			} else {
