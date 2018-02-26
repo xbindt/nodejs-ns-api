@@ -1,87 +1,123 @@
-nodejs-ns-api
-=============
+ns-api
+======
 
-Unofficial [Node.js](http://nodejs.org/) module for [Nederlandse Spoorwegen API](http://www.ns.nl/api/api).
+Access public transit data from [Nederlandse Spoorwegen API](http://www.ns.nl/reisinformatie/ns-api) with node.js
 
-* To use this module you need API access credentials, which you can request at <https://www.ns.nl/ews-aanvraagformulier/>.
-* The method `ns.prijzen` is disabled by default for all API accounts, you need to [contact NS](http://www.ns.nl/api/api#api-documentatie-prijzen) if you want this enabled.
+[![Changelog](https://img.shields.io/npm/v/ns-api.svg?maxAge=3600)](https://github.com/fvdm/nodejs-ns-api/blob/master/CHANGELOG.md)
+[![Build Status](https://travis-ci.org/fvdm/nodejs-ns-api.svg?branch=master)](https://travis-ci.org/fvdm/nodejs-ns-api)
+[![Coverage Status](https://coveralls.io/repos/github/fvdm/nodejs-ns-api/badge.svg?branch=master)](https://coveralls.io/github/fvdm/nodejs-ns-api?branch=master)
+[![bitHound Dependencies](https://www.bithound.io/github/fvdm/nodejs-ns-api/badges/master/dependencies.svg)](https://www.bithound.io/github/fvdm/nodejs-ns-api/master/dependencies/npm)
+[![bitHound Code](https://www.bithound.io/github/fvdm/nodejs-ns-api/badges/master/code.svg)](https://www.bithound.io/github/fvdm/nodejs-ns-api/master/files)
+[![Greenkeeper badge](https://badges.greenkeeper.io/fvdm/nodejs-ns-api.svg)](https://greenkeeper.io/)
 
 
-Installation
-------------
+To use this module you need API access credentials,
+which you can request at [Here](https://www.ns.nl/ews-aanvraagformulier/) (Dutch).
 
-From Github for the most recent code:
+The method `prijzen` is disabled by default for all API accounts,
+you need to [contact NS](http://www.ns.nl/reisinformatie/ns-api/documentatie-prijzen.html) if you want this enabled.
 
-	git clone https://github.com/fvdm/nodejs-ns-api
-	npm install ./nodejs-ns-api
 
-Or from NPM for the most recent and *stable* code:
-
-	npm install ns-api
+* [Node.js](https://nodejs.org)
+* [package](https://www.npmjs.com/package/ns-api)
+* [API documentation](https://www.ns.nl/reisinformatie/ns-api)
 
 
 Example
 -------
 
 ```js
-var ns = require('ns-api')
+const ns = require ('ns-api') ({
+  username: 'api-username',
+  password: 'api-password'
+});
 
-ns.username = 'api-username'
-ns.password = 'api-password'
+// Travel parameters
+const params = {
+  fromStation: 'Amersfoort',
+  toStation: 'Den Haag'
+};
 
-ns.reisadvies(
-  {
-    fromStation: 'Amersfoort',
-    toStation:   'Den Haag',
-    dateTime:    '2013-02-21T15:50',
-    departure:   false
-  },
-  function( err, data ) {
-    console.log( err || data )
-  }
-)
+// console.log is limited to 3 levels
+function myCallback (err, data) {
+  console.dir (err || data, {
+    depth: null,
+    colors: true
+  });
+}
+
+// Get travel advise
+ns.reisadvies (params, myCallback);
+```
+
+
+Installation
+------------
+
+`npm i ns-api --save`
+
+
+Configuration
+-------------
+
+param    | type   | required | default | description
+:--------|:-------|:---------|:--------|:----------------------
+username | string | yes      |         | Your API username
+password | string | yes      |         | Your API password
+timeout  | number | no       | 5000    | Request time out in ms
+
+
+```js
+const ns = require ('ns-api') ({
+  username: 'your-username',
+  password: 'your-password'
+});
 ```
 
 
 Callback function
 -----------------
 
-Each method takes a `callback` function as last *required* parameter. The callback receives two parameters: `err` and `data`. In case of an error the first parameter is an `Error` instance, otherwise `err` is null and `data` is an object or array.
+Each method takes a `callback` function as last *required* parameter.
+The callback receives two parameters: `err` and `data`.
+In case of an error the first parameter is an `Error` instance,
+otherwise `err` is null and `data` is an object or array.
+
 
 ```js
-function( err, data ) {
-	if( err instance of Error ) {
-		console.log( err )
-		// err.stack
-		// err.message    // same as console.log( err )
-		// err.details    // only set when details are available
-	} else {
-		// all good
-		console.log( data )
-	}
+function (err, data) {
+  if (err) {
+    console.log (err);
+    return;
+  }
+
+  console.log (data);
 }
 ```
 
+
 #### Errors
 
-	Error: disconnected        The connection was closed too early
-	Error: invalid response    The API returned invalid data, see `err.details`
-	Error: request failed      Can't make request, see `err.details`
+message          | description                   | additional
+:----------------|:------------------------------|:--------------------------------------------
+request failed   | Request can't be made         | `err.error`
+invalid response | The API returned invalid data | `err.body`
+API error        | The API returned an error     | `err.api`
 
 
 Methods
 -------
 
-
-### vertrektijden ( station, callback )
+### vertrektijden
+**( station, callback )**
 
 Departure times for a `station` identified by either its name or code.
 
-**API docs: [Actuele vertrektijden](http://www.ns.nl/api/api#api-documentatie-actuele-vertrektijden)**
+API docs: [Actuele vertrektijden](http://www.ns.nl/reisinformatie/ns-api/documentatie-actuele-vertrektijden.html)
 
 
 ```js
-ns.vertrektijden( 'Amersfoort', console.log )
+ns.vertrektijden ('Amersfoort', console.log);
 ```
 
 ```js
@@ -106,32 +142,33 @@ ns.vertrektijden( 'Amersfoort', console.log )
 ```
 
 
-### prijzen ( parameters, callback )
+### prijzen
+**( parameters, callback )**
 
 You need special access for this method.
 
-**API docs: [Prijzen](http://www.ns.nl/api/api#api-documentatie-prijzen)**
+API docs: [Prijzen](http://www.ns.nl/reisinformatie/ns-api/documentatie-prijzen.html)
 
 
-### reisadvies ( parameters, callback )
+### reisadvies
+**( parameters, callback )**
 
 Calculate travel plans between stations
 
-**API docs: [Reisadviezen](http://www.ns.nl/api/api#api-documentatie-reisadviezen)**
+API docs: [Reisadviezen](http://www.ns.nl/reisinformatie/ns-api/documentatie-reisadviezen.html)
 
 
 ```js
-ns.reisadvies(
-  {
-    fromStation: 'Amersfoort',
-    toStation:   'Den Haag',
-    dateTime:    '2013-02-21T15:50',
-    departure:   false
-  },
-  function( err, data ) {
-    console.log( err || data )
-  }
-)
+const params = {
+  fromStation: 'Amersfoort',
+  toStation: 'Den Haag',
+  dateTime: '2013-02-21T15:50',
+  departure: false
+};
+
+ns.reisadvies (params, function (err, data) {
+  console.log (err || data)
+});
 ```
 
 **Result:**
@@ -164,20 +201,24 @@ ns.reisadvies(
 ```
 
 
-### stations ( [groupBy], callback )
+### stations
+**( [groupBy], callback )**
 
 Get a list of all stations.
 
-**API docs: [Stationslijst](http://www.ns.nl/api/api#api-documentatie-stationslijst)**
+API docs: [Stationslijst](http://www.ns.nl/reisinformatie/ns-api/documentatie-stationslijst.html)
 
 
-	groupBy   optional   string   Group items by specified key, ie. "Land"
+name     | type     | required | default | description
+:--------|:---------|:---------|:--------|:-----------
+groupBy  | string   | no       | Code    | Group items by specified key, ie. `Land`. Set to `false` to return an _array_.
+callback | function | yes      |         | i.e. `function (err, data)`
 
 
 #### Just the list:
 
 ```js
-ns.stations( console.log )
+ns.stations (console.log);
 ```
 
 ```js
@@ -192,7 +233,7 @@ ns.stations( console.log )
      UICCode: 8400319,
      Lat: 51.69048,
      Lon: 5.29362,
-     Synoniemen: { Synoniem: [ 'Hertogenbosch (\'s)', 'Den Bosch' ] } },
+     Synoniemen: [ 'Hertogenbosch (\'s)', 'Den Bosch' ] },
   HTO: 
    { Code: 'HTO',
      Type: 'stoptreinstation',
@@ -204,14 +245,14 @@ ns.stations( console.log )
      UICCode: 8400320,
      Lat: 51.700554,
      Lon: 5.318333,
-     Synoniemen: { Synoniem: [ 'Hertogenbosch Oost (\'s)', 'Den Bosch Oost' ] } } }
+     Synoniemen: [ 'Hertogenbosch Oost (\'s)', 'Den Bosch Oost' ] } }
 ```
 
 
 #### Grouped by type:
 
 ```js
-ns.stations( 'Type', console.log )
+ns.stations ('Type', console.log);
 ```
 
 ```js
@@ -227,19 +268,26 @@ ns.stations( 'Type', console.log )
         UICCode: 8400319,
         Lat: 51.69048,
         Lon: 5.29362,
-        Synoniemen: { Synoniem: [ 'Hertogenbosch (\'s)', 'Den Bosch' ] } } }
+        Synoniemen: [ 'Hertogenbosch (\'s)', 'Den Bosch' ] } }
 ```
 
 
-### storingen ( parameters, callback )
+### storingen
+**( [parameters], callback )**
 
-Get a list of maintenance and defect notifications. You need to set parameters to get any results.
+Get a list of maintenance and defect notifications.
+You need to set parameters to get any results.
 
-**API docs: [Storingen en werkzaamheden](http://www.ns.nl/api/api#api-documentatie-storingen-en-werkzaamheden)**
+API docs: [Storingen en werkzaamheden](http://www.ns.nl/reisinformatie/ns-api/documentatie-storingen-en-werkzaamheden.html)
 
 
 ```js
-ns.storingen( {station: 'Amsterdam', unplanned: true}, console.log )
+const params = {
+  station: 'Amsterdam',
+  unplanned: true
+};
+
+ns.storingen (params, console.log);
 ```
 
 ```js
@@ -280,3 +328,11 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
 For more information, please refer to <http://unlicense.org/>
+
+
+Author
+------
+
+[Franklin van de Meent](https://frankl.in)
+
+[![Buy me a coffee](https://frankl.in/u/kofi/kofi-readme.png)](https://ko-fi.com/franklin)
